@@ -10,7 +10,7 @@ import os
 from io import BytesIO
 import re
 import stripe
-#from flask_weasyprint import HTML, render_pdf
+from flask_weasyprint import HTML, render_pdf
 stripe.api_key='sk_test_51MMsHhSGj898WTbYXSx509gD14lhhXs8Hx8ipwegdytPB1Bkw0lJykMB0yGpCux95bdw1Gk9Gb9nJIWzPEEDxSqf00GEtCqZ8Y'
 #mydb=mysql.connector.connect(host='localhost',user='root',password='anusha@1999',db='ecom')
 
@@ -491,6 +491,7 @@ def invoice(ordid):
     uname=data[0]
     uaddress=data[2]
     uphnumber=data[1]
-    return  render_template('bill.html', uname=uname,uaddress=uaddress,uphnumber=uphnumber,oname=oname,qty=qty,cost=cost)
+    html=render_template('bill.html', uname=uname,uaddress=uaddress,uphnumber=uphnumber,oname=oname,qty=qty,cost=cost)
+    return render_pdf(HTML(string=html))
 if __name__=='__main__':    
     app.run()
