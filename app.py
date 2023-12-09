@@ -12,12 +12,28 @@ import re
 import stripe
 #from flask_weasyprint import HTML, render_pdf
 stripe.api_key='sk_test_51MMsHhSGj898WTbYXSx509gD14lhhXs8Hx8ipwegdytPB1Bkw0lJykMB0yGpCux95bdw1Gk9Gb9nJIWzPEEDxSqf00GEtCqZ8Y'
-mydb=mysql.connector.connect(host='localhost',user='root',password='anusha@1999',db='ecom')
+#mydb=mysql.connector.connect(host='localhost',user='root',password='anusha@1999',db='ecom')
+
+
 app=Flask(__name__)
 
 app.secret_key=secret_key
 
 app.config['SESSION_TYPE']='filesystem'
+user=os.environ.get('RDS_USERNAME')
+db=os.environ.get('RDS_DB_NAME')
+password=os.environ.get('RDS_PASSWORD')
+host=os.environ.get('RDS_HOSTNAME')
+port=os.environ('RDS_PORT')
+with mysql.connector.connect(host=host,port=port,user=user,password=password,db=db) as conn:
+    cursor=conn.cursor()
+    cursor.execute("create table if not exists users(user_id binary(16),user_name varchar(25) primary key,u_mobile bigint,email varchar(20) unique not null,gender enum('M','F','NAN'),address varchar(256),password varchar(20)")
+    cursor.execute("create table if not exists admindetails(admin_id varchar(6) not null unique,admin_name varchar(20),admin_email varchar(50) primary key,admin_mobile bigint not null unique,password varchar(8))")
+    cursor.execute("create table if not exists additems(item_id binary(16) primary key,item_name longtext,dis longtext not null,qyt int not null,category enum('Electronics','Grocery','Fashion','Home'),price int not null,addedby varchar(50),imgid varchar(10),foreign key(addedby) references admindetails(admin_email))")
+    cursor.execute("create table if not exists reviews(itemid binary(16),user varchar(25),title tinytext,review text,rating int,date datetime default current_timestamp(),primary key(itemid,user))")
+    cursor.execute("create table if not exists orders(ordid bigint primary key auto_increment,itemid binary(16),item_name longtext,qyt int,total_price bigint,user varchar(25),foreign key(itemid) references additems(item_id),foreign key(user) references users(user_name))")
+    cursor.execute("create table if not exists contactus(name varchar(30),emailid varchar(40),message tinytext)")
+mydb=mysql.connector.connect(host=host,user=user,password=password,db=db,port=port)
 Session(app)
 @app.route('/')
 def index():
@@ -476,5 +492,5 @@ def invoice(ordid):
     uaddress=data[2]
     uphnumber=data[1]
     return  render_template('bill.html', uname=uname,uaddress=uaddress,uphnumber=uphnumber,oname=oname,qty=qty,cost=cost)
-    
-app.run(debug=True,use_reloader=True,port=8000)
+if __name__==__main__:    
+    app.run()
