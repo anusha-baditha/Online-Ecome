@@ -27,7 +27,7 @@ host=os.environ.get('RDS_HOSTNAME')
 port=os.environ.get('RDS_PORT')
 with mysql.connector.connect(host=host,port=port,user=user,password=password,db=db) as conn:
     cursor=conn.cursor()
-    cursor.execute("create table if not exists users(user_id binary(16),user_name varchar(25) primary key,u_mobile bigint,email varchar(20) unique not null,gender enum('M','F','NAN'),address varchar(256),password varchar(20)")
+    cursor.execute('create table if not exists users(user_id binary(16),user_name varchar(25) primary key,u_mobile bigint,email varchar(20) unique not null,gender enum("M","F","NAN"),address varchar(256),password varchar(20))')
     cursor.execute("create table if not exists admindetails(admin_id varchar(6) not null unique,admin_name varchar(20),admin_email varchar(50) primary key,admin_mobile bigint not null unique,password varchar(8))")
     cursor.execute("create table if not exists additems(item_id binary(16) primary key,item_name longtext,dis longtext not null,qyt int not null,category enum('Electronics','Grocery','Fashion','Home'),price int not null,addedby varchar(50),imgid varchar(10),foreign key(addedby) references admindetails(admin_email))")
     cursor.execute("create table if not exists reviews(itemid binary(16),user varchar(25),title tinytext,review text,rating int,date datetime default current_timestamp(),primary key(itemid,user))")
