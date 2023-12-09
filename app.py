@@ -492,5 +492,5 @@ def invoice(ordid):
     uaddress=data[2]
     uphnumber=data[1]
     return  render_template('bill.html', uname=uname,uaddress=uaddress,uphnumber=uphnumber,oname=oname,qty=qty,cost=cost)
-if __name__==__main__:    
+if __name__=='__main__':    
     app.run()
