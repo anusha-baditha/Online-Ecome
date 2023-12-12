@@ -1,4 +1,4 @@
-from flask import Flask,request,render_template,url_for,redirect,flash,abort,session
+from flask import Flask,request,render_template,url_for,redirect,flash,abort,session,Response
 import mysql.connector
 from flask_session import Session
 from itsdangerous import URLSafeTimedSerializer
@@ -10,7 +10,8 @@ import os
 from io import BytesIO
 import re
 import stripe
-from flask_weasyprint import HTML, render_pdf
+import pdfkit
+#from flask_weasyprint import HTML, render_pdf
 stripe.api_key='sk_test_51MMsHhSGj898WTbYXSx509gD14lhhXs8Hx8ipwegdytPB1Bkw0lJykMB0yGpCux95bdw1Gk9Gb9nJIWzPEEDxSqf00GEtCqZ8Y'
 #mydb=mysql.connector.connect(host='localhost',user='root',password='anusha@1999',db='ecom')
 
@@ -18,6 +19,7 @@ stripe.api_key='sk_test_51MMsHhSGj898WTbYXSx509gD14lhhXs8Hx8ipwegdytPB1Bkw0lJykM
 app=Flask(__name__)
 
 app.secret_key=secret_key
+config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
 
 app.config['SESSION_TYPE']='filesystem'
 user=os.environ.get('RDS_USERNAME')
@@ -492,6 +494,10 @@ def invoice(ordid):
     uaddress=data[2]
     uphnumber=data[1]
     html=render_template('bill.html', uname=uname,uaddress=uaddress,uphnumber=uphnumber,oname=oname,qty=qty,cost=cost)
-    return render_pdf(HTML(string=html))
+    #return render_pdf(HTML(string=html))
+    pdf = pdfkit.from_string(html, False, configuration=config)
+    response = Response(pdf, content_type='application/pdf')
+    response.headers['Content-Disposition'] = 'inline; filename=output.pdf'
+    return response
 if __name__=='__main__':    
     app.run()
